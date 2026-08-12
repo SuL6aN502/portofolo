@@ -1,4 +1,5 @@
 import { PersonalInfo } from "@/types";
+import TypeWriter from "@/components/TypeWriter";
 
 interface HeroProps {
   personalInfo: PersonalInfo;
@@ -33,9 +34,23 @@ export default function Hero({ personalInfo }: HeroProps) {
             </span>
           </h1>
 
+          <div className="text-xl font-semibold text-gray-700 dark:text-gray-300 sm:text-2xl">
+            I'm a{" "}
+            <TypeWriter
+              className="bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent"
+              words={[
+                "Front-End Developer",
+                "React Developer",
+                "Next.js Developer",
+                "Computer Science Student",
+                "UI/UX Enthusiast",
+              ]}
+            />
+          </div>
+
           <p className="mx-auto max-w-2xl text-lg text-gray-600 dark:text-gray-400 sm:text-xl">
-            Front-End Developer & Computer Science Student — building
-            performant, accessible web experiences with modern technologies.
+            Building performant, accessible web experiences with modern
+            technologies.
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-gray-500 dark:text-gray-400">
