@@ -11,13 +11,13 @@ export default function Contact({ personalInfo }: ContactProps) {
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
         <SectionHeading title="Get In Touch" subtitle="Let's work together" />
 
-        <div className="mx-auto max-w-lg space-y-6">
+        <div className="mx-auto max-w-3xl space-y-6">
           <p className="text-center text-gray-600 dark:text-gray-400">
             I'm currently looking for full-time/part-time opportunities. Whether
             you have a project or just want to say hi, feel free to reach out!
           </p>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
             {/* Left column — LinkedIn & Location */}
             <div className="flex flex-col gap-4">
               {/* LinkedIn */}
