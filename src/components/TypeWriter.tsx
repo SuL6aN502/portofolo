@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
+import { animate } from "animejs";
 
 interface TypeWriterProps {
   words: string[];
@@ -12,47 +13,72 @@ interface TypeWriterProps {
 
 export default function TypeWriter({
   words,
-  typeSpeed = 80,
-  deleteSpeed = 40,
-  delay = 1600,
+  typeSpeed = 60,
+  deleteSpeed = 30,
+  delay = 1800,
   className,
 }: TypeWriterProps) {
-  const [wordIndex, setWordIndex] = useState(0);
-  const [subIndex, setSubIndex] = useState(0);
-  const [reverse, setReverse] = useState(false);
+  const textRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     if (words.length === 0) return;
 
-    const word = words[wordIndex % words.length];
+    let wordIndex = 0;
+    let cancelled = false;
+    let pauseTimer: ReturnType<typeof setTimeout> | null = null;
+    let animation: ReturnType<typeof animate> | null = null;
 
-    // Finished typing the full word -> pause, then start deleting.
-    if (!reverse && subIndex === word.length) {
-      const timeout = setTimeout(() => setReverse(true), delay);
-      return () => clearTimeout(timeout);
-    }
+    const writeText = (value: string) => {
+      if (textRef.current) textRef.current.textContent = value;
+    };
 
-    // Finished deleting -> move to the next word.
-    if (reverse && subIndex === 0) {
-      setReverse(false);
-      setWordIndex((prev) => (prev + 1) % words.length);
-      return;
-    }
+    const typeWord = () => {
+      if (cancelled) return;
+      const word = words[wordIndex % words.length];
+      const state = { chars: 0 };
 
-    const timeout = setTimeout(
-      () => setSubIndex((prev) => prev + (reverse ? -1 : 1)),
-      reverse ? deleteSpeed : typeSpeed
-    );
+      animation = animate(state, {
+        chars: [0, word.length],
+        duration: word.length * typeSpeed,
+        ease: "linear",
+        onUpdate: () => writeText(word.substring(0, Math.round(state.chars))),
+        onComplete: () => {
+          if (cancelled) return;
+          pauseTimer = setTimeout(deleteWord, delay);
+        },
+      });
+    };
 
-    return () => clearTimeout(timeout);
-  }, [subIndex, reverse, wordIndex, words, typeSpeed, deleteSpeed, delay]);
+    const deleteWord = () => {
+      if (cancelled) return;
+      const word = words[wordIndex % words.length];
+      const state = { chars: word.length };
 
-  const currentWord =
-    words[wordIndex % words.length]?.substring(0, subIndex) ?? "";
+      animation = animate(state, {
+        chars: [word.length, 0],
+        duration: word.length * deleteSpeed,
+        ease: "linear",
+        onUpdate: () => writeText(word.substring(0, Math.round(state.chars))),
+        onComplete: () => {
+          if (cancelled) return;
+          wordIndex = (wordIndex + 1) % words.length;
+          typeWord();
+        },
+      });
+    };
+
+    typeWord();
+
+    return () => {
+      cancelled = true;
+      animation?.cancel();
+      if (pauseTimer) clearTimeout(pauseTimer);
+    };
+  }, [words, typeSpeed, deleteSpeed, delay]);
 
   return (
     <span className={className}>
-      {currentWord}
+      <span ref={textRef} />
       <span className="animate-pulse text-blue-500 dark:text-cyan-400">|</span>
     </span>
   );
